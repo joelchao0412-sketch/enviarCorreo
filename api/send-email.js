@@ -9,14 +9,28 @@ export default async function handler(req, res) {
   }
   
 
-  // 2. Obtenemos los datos del cuerpo de la petición
+  // 2. Verificamos el token Bearer
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'No autorizado: falta token' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  // Comparamos con el token que tienes en variables de entorno
+  if (token !== process.env.API_SECRET) {
+    return res.status(403).json({ message: 'Token inválido' });
+  }
+
+  // 3. Obtenemos los datos del cuerpo de la petición
   const { to, subject, body } = req.body;
 
   if (!to || !subject || !body) {
     return res.status(400).json({ message: 'Faltan campos: to, subject, body' });
   }
 
-  // 3. Configuramos el transporter de Nodemailer
+  // 4. Configuramos el transporter de Nodemailer
   // Usamos variables de entorno para las credenciales (¡MUY IMPORTANTE!)
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST, // 'smtp.gmail.com' para Gmail
@@ -28,7 +42,7 @@ export default async function handler(req, res) {
     },
   });
 
-  // 4. Configuramos las opciones del correo
+  // 5. Configuramos las opciones del correo
   const mailOptions = {
     from: `"Mi App Flutter" <${process.env.EMAIL_USER}>`,
     to: to,
@@ -38,7 +52,7 @@ export default async function handler(req, res) {
   };
 
   try {
-    // 5. Enviamos el correo
+    // 6. Enviamos el correo
     await transporter.sendMail(mailOptions);
     res.status(200).json({ message: 'Correo enviado con éxito' });
   } catch (error) {
