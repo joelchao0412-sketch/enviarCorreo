@@ -7,12 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Método no permitido' });
   }
-
-  // ✅ Validar token
-  const authHeader = req.headers['authorization'];
-  if (!authHeader || authHeader !== `Bearer ${process.env.API_SECRET}`) {
-    return res.status(401).json({ message: 'No autorizado' });
-  }
+  
 
   // 2. Obtenemos los datos del cuerpo de la petición
   const { to, subject, body } = req.body;
