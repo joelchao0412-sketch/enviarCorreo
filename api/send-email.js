@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   }
 
   // 3. Obtenemos los datos del cuerpo de la petición
-  const { to, subject, body } = req.body;
+  const { to, subject, body, attachment, filename } = req.body;
 
   if (!to || !subject || !body) {
     return res.status(400).json({ message: 'Faltan campos: to, subject, body' });
@@ -47,7 +47,16 @@ export default async function handler(req, res) {
     from: `"Mi App Flutter" <${process.env.EMAIL_USER}>`,
     to: to,
     subject: subject,
-    text: body,
+    text: body || '',
+    attachments: attachment
+      ? [
+          {
+            filename: filename || 'archivo.pdf',
+            content: Buffer.from(attachment, 'base64'),
+            contentType: 'application/pdf',
+          },
+        ]
+      : [],
     // html: "<b>Hola mundo</b>" // Puedes enviar HTML también
   };
 
